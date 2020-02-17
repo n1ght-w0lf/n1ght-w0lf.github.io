@@ -1,0 +1,128 @@
+---
+---
+
+@import index, highlight
+
+{% unless site.minimal %}
+
+.categories
+  color: $link-color
+  margin-bottom: .15em
+
+{% endunless %}
+
+{% unless site.navigation and site.external %}
+
+.title
+  font-size: 1.3em
+  margin: .2em 0
+
+{% endunless %}
+
+{% if site.sidebar %}
+
+.hidden
+  display: none
+
+{% endif %}
+
+{% if site.sidebar or site.external %}
+
+.icons svg
+  height: 1em
+  width: 1em
+  fill: currentColor
+  transition: .2s color
+  vertical-align: middle
+  margin-bottom: .15em
+
+{% endif %}
+
+{% if site.show_excerpts %}
+
+.more
+  margin: 2em 0 1em
+
+.more a
+  border-radius: 2px
+  border: 1.5px solid $link-color
+  padding: .4em .8em
+  transition: .2s
+
+.more a:hover
+  color: #fff
+  background: $link-color
+  text-decoration: inherit
+
+{% endif %}
+
+{% unless site.show_excerpts %}
+
+.archive
+  font-size: 1.1em
+
+.archive time
+  display: inline-block
+  min-width: 10ch
+  margin: 0 .2em
+
+{% endunless %}
+
+{% if site.show_related %}
+
+.related span
+  display: block
+  color: reduce(100)
+
+.related a
+  font-size: 1.2em
+  font-weight: bold
+
+.next
+  text-align: right
+
+{% endif %}
+
+{% if site.show_title and site.navigation and site.external %}
+
+.title
+  font-size: 1.5em
+  width: 100%
+  margin: .1em 0 .6em
+
+{% endif %}
+
+{% unless site.sidebar %}
+
+.icons a:hover svg
+  color: reduce(100)
+
+@media (min-width: 70em)
+  .large
+    margin: 1em -20%
+  
+  .large img
+    width: 100%
+
+{% endunless %}
+
+{% if site.line_count %}
+
+.rouge-table
+  width: initial
+
+.rouge-table tr, .rouge-table td
+  background: inherit!important
+  border: none
+
+.rouge-table pre
+  font-size: inherit
+  background: inherit
+  margin: 0
+  padding: 0
+
+.rouge-gutter
+  opacity: .5
+  padding: 0 .5em
+
+{% endif %}

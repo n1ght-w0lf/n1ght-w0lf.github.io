@@ -1,0 +1,45 @@
+title: "N1ght-W0lf"
+author: "Abdallah Elshinbary"
+description: "Made with <b style=\"color: #f45;\">1337</b> by <b><a href=\"https://twitter.com/NightW0o0lf\">@NightW0o0lf</a></b>"
+permalink: /:title/
+lang: "en"
+excerpt_separator: "\n\n\n"
+date_format: "%B %d, %Y"
+
+# Layout
+
+sidebar: true                # show a sidebar instead of the usual header
+show_excerpts: false         # show article excerpts on the home page
+show_related: true           # show the previous and next links after every post
+show_description: true       # show the site description in the sidebar
+show_title: true            # always keep the site title visible
+
+# Pagination
+
+paginate: 14
+paginate_path: "/page:num/"
+
+# Styling
+
+dark_header: false           # always keep the header dark
+minimal: false               # use simpler style
+
+# Menu
+
+navigation:
+  - {file: "index.html", icon: home}
+  - {file: "malware-reports.md", icon: bug}
+  - {file: "exploit-education.md", icon: book-dead}
+  - {file: "about.md", icon: address-card}
+
+external:                    # see http://fontawesome.com/icons
+  - {title: Github, icon: github, url: "https://github.com/N1ght-W0lf"}
+  - {title: Mail, icon: envelope, url: "mailto:abdallahelshinbary82@gmail.com"}
+
+comments:
+#  disqus: ""                # see https://disqus.com/
+#  isso: ""                  # see https://posativ.org/isso/
+
+plugins:
+ - jekyll-feed
+ - jekyll-paginate

