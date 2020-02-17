@@ -5,6 +5,7 @@ permalink: /:title/
 lang: "en"
 excerpt_separator: "\n\n\n"
 date_format: "%B %d, %Y"
+url: n1ght-w0lf.github.io
 
 # Layout
 
