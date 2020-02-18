@@ -31,6 +31,7 @@ navigation:
   - {file: "index.html", icon: home}
   - {file: "malware-reports.md", icon: bug}
   - {file: "exploit-education.md", icon: book-dead}
+  - {file: "misc.md", icon: boxes}
   - {file: "about.md", icon: address-card}
 
 external:                    # see http://fontawesome.com/icons
