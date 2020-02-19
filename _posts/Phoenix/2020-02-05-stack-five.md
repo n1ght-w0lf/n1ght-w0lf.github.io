@@ -1,5 +1,5 @@
 ---
-title: "Stack Five"
+title: " Exploit Education | Phoenix | Stack Five"
 permalink: "exploit-education/phoenix/:title"
 layout: post
 ---

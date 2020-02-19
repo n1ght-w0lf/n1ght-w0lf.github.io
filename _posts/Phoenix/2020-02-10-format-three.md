@@ -1,5 +1,5 @@
 ---
-title: "Format Three"
+title: " Exploit Education | Phoenix | Format Three"
 permalink: "exploit-education/phoenix/:title"
 layout: post
 ---

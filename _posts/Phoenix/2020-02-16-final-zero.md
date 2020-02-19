@@ -1,5 +1,5 @@
 ---
-title: "Final Zero"
+title: " Exploit Education | Phoenix | Final Zero"
 permalink: "exploit-education/phoenix/:title"
 layout: post
 ---

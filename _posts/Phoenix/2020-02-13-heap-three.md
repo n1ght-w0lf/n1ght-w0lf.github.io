@@ -1,5 +1,5 @@
 ---
-title: "Heap Three"
+title: " Exploit Education | Phoenix | Heap Three"
 permalink: "exploit-education/phoenix/:title"
 layout: post
 ---
