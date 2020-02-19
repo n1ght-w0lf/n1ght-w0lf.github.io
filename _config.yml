@@ -36,7 +36,7 @@ navigation:
   - {file: "about.md", icon: address-card}
 
 external:                    # see http://fontawesome.com/icons
-  - {title: Github, icon: github, url: "https://github.com/N1ght-W0lf"}
+  - {title: Github, icon: github, url: "https://github.com/N1ght-W0lf/n1ght-w0lf.github.io"}
   - {title: Mail, icon: envelope, url: "mailto:abdallahelshinbary82@gmail.com"}
 
 comments:
