@@ -29,8 +29,9 @@ minimal: false               # use simpler style
 
 navigation:
   - {file: "index.html", icon: home}
-  - {file: "malware-reports.md", icon: bug}
-  - {file: "exploit-education.md", icon: book-dead}
+  - {file: "malware-analysis.md", icon: bug}
+  - {file: "binary-exploitation.md", icon: book-dead}
+  # - {file: "exploit-education.md", icon: book-dead}
   - {file: "ctf-writeups.md", icon: flag}
   - {file: "misc.md", icon: boxes}
   - {file: "about.md", icon: address-card}
