@@ -7,11 +7,12 @@
 <meta name="author" content="{{ page.author | default: site.author | escape }}">
 <meta name="generator" content="Jekyll v{{ jekyll.version }}">
 
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://n1ght-w0lf.github.io/">
-<meta property="og:title" content="Home | N1ght-W0lf">
-<meta property="og:description" content="Made with 1337 by @NightW0o0lf">
-<meta property="og:image" content="/thumbnail.png">
+<meta content="website" property="og:type">
+<meta content="{{ site.title }}" property="og:site_name">
+<meta content="{{ site.title }}" property="og:title">
+<meta content="{{ site.description }}" property="og:description">
+<meta content="{{ site.url }}" property="og:url">
+<meta content="{{ site.url }}/assets/images/thumbnail.png" property="og:image">
 
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 {% if site.minimal %}
