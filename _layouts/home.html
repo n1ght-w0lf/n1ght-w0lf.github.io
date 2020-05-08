@@ -1,19 +1,19 @@
 ---
-layout: default
+layout: archive
 ---
-{% if site.show_excerpts %}
-  {%- assign posts = paginator.posts | default: site.posts -%}
-  {% for post in posts %}
-    {% include post.html post=post preview=true %}
-  {% endfor %}
+
+{{ content }}
+
+<h3 class="archive__subtitle">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</h3>
+
+{% if paginator %}
+  {% assign posts = paginator.posts %}
 {% else %}
-  {% include archive.html title="Posts" %}
+  {% assign posts = site.posts %}
 {% endif %}
 
-{% if paginator.total_pages > 1 %}
-  <footer>
-    {% if paginator.previous_page %}<a href="{{ paginator.previous_page_path | relative_url }}">« newer posts</a>{% else %}<span></span>{% endif %}
-    <span>page {{ paginator.page }} of {{ paginator.total_pages }}</span>
-    {% if paginator.next_page %}<a href="{{ paginator.next_page_path | relative_url }}">older posts »</a>{% else %}<span></span>{% endif %}
-  </footer>
-{% endif %}
+{% for post in posts %}
+  {% include archive-single.html %}
+{% endfor %}
+
+{% include paginator.html %}
