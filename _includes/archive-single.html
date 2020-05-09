@@ -19,7 +19,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
 
-<div class="post-blog-card" onclick="location.href='{{ post.url | relative_url }}'" style="cursor: pointer; 
+<a href="{{ post.url | relative_url }}" class="post-blog-card" style="text-decoration: none; 
     --image-url: url({{ teaser }});
     --ribbon: {{ ribbon }};">
 
@@ -42,7 +42,7 @@
     {% endif %}
 
   </div>
-</div>
+</a>
 
 
 
