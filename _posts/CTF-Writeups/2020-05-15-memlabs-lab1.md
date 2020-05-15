@@ -77,8 +77,7 @@ The output is written to `2424.dmp`, we need to rename it to `2424.data` to be a
 
 After playing a bit with the width and offset. I got an image which is somewhat flipped. I rotated it 180 degrees then flipped it horizontally and Voila!, I got the flag.
 
-[![4](/assets/images/ctf-writeups/memlabs/lab1/4.png)](/assets/images/ctf-writeups/memlabs/lab1/4.png) | 
-[![5](/assets/images/ctf-writeups/memlabs/lab1/5.png)](/assets/images/ctf-writeups/memlabs/lab1/5.png)
+[![4](/assets/images/ctf-writeups/memlabs/lab1/4.png)](/assets/images/ctf-writeups/memlabs/lab1/4.png) | [![5](/assets/images/ctf-writeups/memlabs/lab1/5.png)](/assets/images/ctf-writeups/memlabs/lab1/5.png)
 
 > #### Flag 2: flag{G00d_Boy_good_girL}
 
@@ -115,7 +114,7 @@ The file is dumped under the name `file.None.0xfffffa8001034450.dat`, let's rena
 
 ```
 $ mv file.None.0xfffffa8001034450.dat Important.rar
-night-wolf@ubuntu:~/MemLabs/lab1_output$ unrar e Important.rar 
+$ unrar e Important.rar 
 
 UNRAR 5.61 beta 1 freeware      Copyright (c) 1993-2018 Alexander Roshal
 
