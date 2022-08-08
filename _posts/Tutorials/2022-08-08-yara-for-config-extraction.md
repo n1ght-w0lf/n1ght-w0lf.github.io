@@ -26,7 +26,7 @@ To use a YARA module you simply import it using `import "module_name"`, you can 
 
 Example:
 
-```c++
+```pascal
 import "pe"
 
 rule test {
@@ -55,7 +55,7 @@ In the following instruction for example, the string token is `0x7000067B` (litt
 
 The `dotnet` module already has the functionality to retrieve all user strings from a dotnet sample.
 
-```css
+```pascal
 import "dotnet"
 import "console"
 
@@ -98,7 +98,7 @@ $ sudo make install
 
 We can now write a simple rule to read the config fields.
 
-```css
+```pascal
 import "dotnet"
 import "console"
 
@@ -233,7 +233,7 @@ With everything in place, let's now test our module.
 
 Below is the final YARA rule that handles both RedLine variants.
 
-```css
+```pascal
 import "dotnet"
 import "console"
 import "malutils"
