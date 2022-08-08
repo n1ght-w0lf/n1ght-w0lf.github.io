@@ -26,7 +26,7 @@ To use a YARA module you simply import it using `import "module_name"`, you can 
 
 Example:
 
-```pascal
+```jsx
 import "pe"
 
 rule test {
@@ -55,7 +55,7 @@ In the following instruction for example, the string token is `0x7000067B` (litt
 
 The `dotnet` module already has the functionality to retrieve all user strings from a dotnet sample.
 
-```lua
+```jsx
 import "dotnet"
 import "console"
 
@@ -233,7 +233,7 @@ With everything in place, let's now test our module.
 
 Below is the final YARA rule that handles both RedLine variants.
 
-```
+```jsx
 import "dotnet"
 import "console"
 import "malutils"
