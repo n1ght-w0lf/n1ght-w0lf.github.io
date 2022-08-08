@@ -26,7 +26,7 @@ To use a YARA module you simply import it using `import "module_name"`, you can 
 
 Example:
 
-```yaml
+```c++
 import "pe"
 
 rule test {
@@ -49,13 +49,13 @@ To read these fields we need to understand how [ldstr](https://docs.microsoft.co
 
 In the following instruction for example, the string token is `0x7000067B` (little-endian) and the row index is `0x67B`.
 
-```assembly
+```c++
 727B060070   // ldstr "87.251.71.4:80"
 ```
 
 The `dotnet` module already has the functionality to retrieve all user strings from a dotnet sample.
 
-```yaml
+```c++
 import "dotnet"
 import "console"
 
@@ -98,7 +98,7 @@ $ sudo make install
 
 We can now write a simple rule to read the config fields.
 
-```yaml
+```c++
 import "dotnet"
 import "console"
 
@@ -233,7 +233,7 @@ With everything in place, let's now test our module.
 
 Below is the final YARA rule that handles both RedLine variants.
 
-```yaml
+```c++
 import "dotnet"
 import "console"
 import "malutils"
@@ -313,8 +313,7 @@ Running the rule on a list of samples produces the following output:
 Beautiful right!
 
 You can pull the code and try it yourself at 
-
-https://github.com/N1ght-W0lf/yara/tree/malutils.
+[https://github.com/N1ght-W0lf/yara/tree/malutils](https://github.com/N1ght-W0lf/yara/tree/malutils)
 
 It was just for learning purposes so not the best code :)
 
@@ -330,6 +329,6 @@ f343005539a589ec5512559e0bdc824c1069196ae39d519e5b1f3257f4a6660b
 
 ## References
 
-https://yara.readthedocs.io/en/stable/index.html
+[https://yara.readthedocs.io/en/stable/index.html](https://yara.readthedocs.io/en/stable/index.html)
 
-https://www.ntcore.com/files/dotnetformat.htm
+[https://www.ntcore.com/files/dotnetformat.htm](https://www.ntcore.com/files/dotnetformat.htm)
