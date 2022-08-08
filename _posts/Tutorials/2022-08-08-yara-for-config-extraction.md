@@ -98,7 +98,7 @@ $ sudo make install
 
 We can now write a simple rule to read the config fields.
 
-```lua
+```jsx
 import "dotnet"
 import "console"
 
@@ -233,7 +233,7 @@ With everything in place, let's now test our module.
 
 Below is the final YARA rule that handles both RedLine variants.
 
-```v
+```
 import "dotnet"
 import "console"
 import "malutils"
