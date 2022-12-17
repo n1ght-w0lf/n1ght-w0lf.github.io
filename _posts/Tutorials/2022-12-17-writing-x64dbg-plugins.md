@@ -216,6 +216,8 @@ Finally we can run `EasyDump` (the command we registered in `pluginInit`) and wa
 
 [![2](/assets/images/tutorials/x64dbg/plugins/2.png)](/assets/images/tutorials/x64dbg/plugins/2.png)
 
+source code: https://github.com/N1ght-W0lf/EasyDump
+
 ## Final words
 
 The goal of this tutorial was to learn more about x64dbg not write the best dumping plugin :)

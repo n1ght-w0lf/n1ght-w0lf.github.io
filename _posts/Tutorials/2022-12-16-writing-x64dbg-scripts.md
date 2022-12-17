@@ -7,7 +7,7 @@ ribbon: ForestGreen
 description: "x64dbg is an open-source x64/x32 debugger for windows, it has dozens of features that make the life of reverse engineers and malware..."
 categories:
   - Tutorials
-toc: true
+toc: false
 ---
 
 x64dbg is an open-source x64/x32 debugger for windows, it has dozens of features that make the life of reverse engineers and malware analysts easier.
@@ -28,14 +28,14 @@ The unpacking workflow (how I usually do it) is to set a breakpoint at `VirtualA
 
 First we will define two variables to hold the address and size of allocated memory regions using `var` command. 
 
-```assembly
+```nasm
 var mem_addr
 var mem_size
 ```
 
 Next we can set our breakpoints.
 
-```assembly
+```nasm
 bp VirtualAlloc
 SetBreakpointCommand VirtualAlloc, "scriptcmd call cb_virtual_alloc"
 
@@ -47,7 +47,7 @@ We can use `SetBreakpointCommand` to set a command to execute when the breakpoin
 
 The command we need here is `call` which will jump to a callback function defined by a label, we also have to use `scriptcmd` to execute the call in the context of a running script (not in the context of the debugging loop).
 
-```assembly
+```nasm
 cb_virtual_alloc:
     rtr
     set mem_addr, cax
@@ -74,7 +74,7 @@ To get an argument at a given index we can use the expression function `arg.get(
 
 With that done let's define the next callback.
 
-```assembly
+```nasm
 cb_virtual_protect:
     log "New protection: {x:arg.get(2)}"
     cmp word(mem_addr), 5a4d
@@ -98,7 +98,7 @@ Simple as that.
 
 Full script:
 
-```assembly
+```nasm
 ; define a variable to hold allocated mem address
 var mem_addr
 ; define a variable to hold allocated mem size
