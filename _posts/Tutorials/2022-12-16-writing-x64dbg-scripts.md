@@ -28,14 +28,14 @@ The unpacking workflow (how I usually do it) is to set a breakpoint at `VirtualA
 
 First we will define two variables to hold the address and size of allocated memory regions using `var` command. 
 
-```nasm
+```c++
 var mem_addr
 var mem_size
 ```
 
 Next we can set our breakpoints.
 
-```nasm
+```c++
 bp VirtualAlloc
 SetBreakpointCommand VirtualAlloc, "scriptcmd call cb_virtual_alloc"
 
@@ -47,7 +47,7 @@ We can use `SetBreakpointCommand` to set a command to execute when the breakpoin
 
 The command we need here is `call` which will jump to a callback function defined by a label, we also have to use `scriptcmd` to execute the call in the context of a running script (not in the context of the debugging loop).
 
-```nasm
+```c++
 cb_virtual_alloc:
     rtr
     set mem_addr, cax
@@ -74,7 +74,7 @@ To get an argument at a given index we can use the expression function `arg.get(
 
 With that done let's define the next callback.
 
-```nasm
+```c++
 cb_virtual_protect:
     log "New protection: {x:arg.get(2)}"
     cmp word(mem_addr), 5a4d
@@ -92,61 +92,61 @@ The first argument of `savedata` command is the filename, if we use `:memdump:` 
 
 Finally we use `run` command to run the program and watch the magic happen. you can use `Tab` to step into the script or `Space` to run the script.
 
-![2](/assets/videos/tutorials/x64dbg/scripting/script.mp4)
+<video src="https://user-images.githubusercontent.com/58216643/208249322-502985c8-fb2a-4571-af57-a39b0b44eca8.mp4" controls="controls" />
 
 Simple as that.
 
 Full script:
 
-```nasm
-; define a variable to hold allocated mem address
+```c++
+// define a variable to hold allocated mem address
 var mem_addr
-; define a variable to hold allocated mem size
+// define a variable to hold allocated mem size
 var mem_size
 
-; set breakpoint on VirtualAlloc
+// set breakpoint on VirtualAlloc
 bp VirtualAlloc
-; set callback on breakpoint hit
+// set callback on breakpoint hit
 SetBreakpointCommand VirtualAlloc, "scriptcmd call cb_virtual_alloc"
-; set breakpoint on VirtualProtect
+// set breakpoint on VirtualProtect
 bp VirtualProtect
-; set callback on breakpoint hit
+// set callback on breakpoint hit
 SetBreakpointCommand VirtualProtect, "scriptcmd call cb_virtual_protect"
 
-; go to main label
+// go to main label
 goto main
 
-; define VirtualAlloc callback label
+// define VirtualAlloc callback label
 cb_virtual_alloc:
-    ; run until return (stepout)
+    // run until return (stepout)
     rtr
-    ; set mem_addr value to cax value (return value)
+    // set mem_addr value to cax value (return value)
     set mem_addr, cax
-    ; log memory address
+    // log memory address
     log "Allocated memory address: {x:mem_addr}"
-    ; set mem_size value to VirtualAlloc's second arg value (region size)
+    // set mem_size value to VirtualAlloc's second arg value (region size)
     set mem_size, arg.get(1)
-    ; log memory size
+    // log memory size
     log "Allocated memory size: {x:mem_size}"
-    ; go to main label
+    // go to main label
     goto main
 
-; define VirtualProtect callback label
+// define VirtualProtect callback label
 cb_virtual_protect:
-    ; log VirtualProtect's second arg value (new protection)
+    // log VirtualProtect's second arg value (new protection)
     log "New protection: {x:arg.get(2)}"
-    ; compare the first 2 bytes at mem_addr address to "MZ"
+    // compare the first 2 bytes at mem_addr address to "MZ"
     cmp word(mem_addr), 5a4d
-    ; if not equal, jump to main label
+    // if not equal, jump to main label
     jne main
-    ; dump data at mem_addr address to disk
+    // dump data at mem_addr address to disk
     savedata :memdump:, mem_addr, mem_size
 
-; define main label
+// define main label
 main:
-    ; run the program
+    // run the program
     run
 
-; end the script
+// end the script
 ret
 ```
