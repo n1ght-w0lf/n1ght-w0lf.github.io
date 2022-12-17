@@ -46,11 +46,11 @@ A plugin must have an exported function called `pluginit`, this is the first fun
 
 Other optional exports are:
 
--  `plugstop`
+-  `plugstop`:
 
   called when the plugin is about to be unloaded and where the plugin data cleanup occurs.
 
-- `plugsetup`
+- `plugsetup`:
 
   called when the plugin initialization was successful, here you can register menus and other GUI-related things.
 
@@ -64,19 +64,19 @@ To view the full list you can explore the SDK header files.
 
 For me plugin SDK functions are divided into 4 main categories:
 
-- \_plugin\_ functions @`_plugins.h`
+- \_plugin\_ functions @`_plugins.h`:
 
   Helper functions for plugin setup, initialization and logging.
 
-- bridge functions @`bridgemain.h`
+- bridge functions @`bridgemain.h`:
 
   Bridge is the communication library for the DBG and GUI part of x64dbg.
 
-- scriptapi functions @`_scriptapi_*.h`
+- scriptapi functions @`_scriptapi_*.h`:
 
   It is intended to be used by plugins. It provides easy scripting experience for developers.
 
-- TitanEngine functions @`TitanEngine.h`
+- TitanEngine functions @`TitanEngine.h`:
 
   Titan is the debugging engine for x64dbg.
 
@@ -216,7 +216,7 @@ Finally we can run `EasyDump` (the command we registered in `pluginInit`) and wa
 
 [![2](/assets/images/tutorials/x64dbg/plugins/2.png)](/assets/images/tutorials/x64dbg/plugins/2.png)
 
-source code: https://github.com/N1ght-W0lf/EasyDump
+source code: [https://github.com/N1ght-W0lf/EasyDump](https://github.com/N1ght-W0lf/EasyDump)
 
 ## Final words
 
