@@ -218,6 +218,16 @@ Finally we can run `EasyDump` (the command we registered in `pluginInit`) and wa
 
 source code: [https://github.com/N1ght-W0lf/EasyDump](https://github.com/N1ght-W0lf/EasyDump)
 
+### Updates
+
+> **Some notes from [Duncan Ogilvie @mrexodia](https://twitter.com/mrexodia)**
+>
+> As a general rule I’d avoid using the TitanEngine APIs directly. They can cause some weird scenarios where x64dbg doesn’t know about a breakpoint for example. Unfortunately the plugin API isn’t very strong on this front though, so it’s a lot more work to do the same…
+>
+> Also something worth exploring is the C# scripting plugin: [https://github.com/x64dbg/DotX64Dbg](https://github.com/x64dbg/DotX64Dbg) 
+>
+> And confusingly `DbgCmdExec` (queues a command asynchronously) causes a race condition in your example. Likely you want `DbgCmdExecDirect` instead (executed the implementation of the command directly)
+
 ## Final words
 
 The goal of this tutorial was to learn more about x64dbg not write the best dumping plugin :)
