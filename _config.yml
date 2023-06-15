@@ -95,7 +95,7 @@ analytics:
 author:
   name             : "Abdallah Elshinbary"
   avatar           : /assets/images/site_data/avatar.jpg # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "===> OPEN FOR MALWARE RESEARCH WORK <==="
+  bio              : "Malware Analysis & Reverse Engineering Adventures, opinions are my own."
   location         : "Area 51"
   email            :
   links:
