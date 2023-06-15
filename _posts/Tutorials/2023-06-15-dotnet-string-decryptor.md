@@ -1,5 +1,5 @@
 ---
-title: "Dotnet string decryptor"
+title: "Dotnet String Decryptor"
 classes: wide
 header:
   teaser: /assets/images/tutorials/dotnet/logo.png
