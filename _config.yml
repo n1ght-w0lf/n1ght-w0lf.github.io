@@ -16,7 +16,7 @@ minimal_mistakes_skin    : "dark" # "air", "aqua", "contrast", "dark", "dirt", "
 
 # Site Settings
 locale                   : "en-US"
-title                    : "N1ght-W0lf"
+title                    : "n1ghtw0lf"
 title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
 name                     : "Abdallah Elshinbary"
@@ -116,7 +116,7 @@ author:
       url: "https://www.linkedin.com/in/abdallah-elshinbary/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      url: "https://github.com/N1ght-W0lf"
+      url: "https://github.com/n1ght-w0lf"
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
       # url: "https://instagram.com/"
