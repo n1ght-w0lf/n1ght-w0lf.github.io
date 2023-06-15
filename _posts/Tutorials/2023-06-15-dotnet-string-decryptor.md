@@ -20,13 +20,12 @@ But sometimes you don't want to go through every sample and find the decryption 
 
 While looking around for a solution I found this cool [blog](http://rhotav.com/stringDecryptionWithPythonen/), so I will be building on it to write a generic dotnet string decryptor which will hopefully make life a bit easier.
 
-We will be working on an obfuscated sample of [DCRat](https://malpedia.caad.fkie.fraunhofer.de/details/win.dcrat) to test our script.
-
+We will be working on an obfuscated sample of [DCRat](https://malpedia.caad.fkie.fraunhofer.de/details/win.dcrat) to test our script
 [c6244c8e4e4cdecd641017d52d344b1db6a23d05fd6a8ad338c8f4f77481f483](https://bazaar.abuse.ch/sample/c6244c8e4e4cdecd641017d52d344b1db6a23d05fd6a8ad338c8f4f77481f483/)
 
-## Writing the deobfuscation script
+# Writing the deobfuscation script
 
-### Step 1 : Importing libs and loading the .NET file
+## Step 1 : Importing libs and loading the .NET file
 
 We first need to install `pythonnet` which allows CLR namespaces to be treated essentially as python packages.
 
@@ -59,7 +58,7 @@ file_module = ModuleDefMD.Load(file_path)
 file_assembly = Assembly.LoadFile(file_path)
 ```
 
-### Step 2 : Finding suspected decryption methods
+## Step 2 : Finding suspected decryption methods
 
 Before we get any further we need to define the signatures of the suspected methods that are used for string decryption.
 
@@ -123,7 +122,7 @@ If we find a suspected method we need to store its corresponding signature and [
                     suspected_methods[method_name] = (sig, method)
 ```
 
-### Step 3 : Finding references to suspected methods
+## Step 3 : Finding references to suspected methods
 
 The next step is to find references to the suspected methods so we can get the required parameters.
 
@@ -173,7 +172,7 @@ Next we can invoke suspected methods to get the decrypted strings
                                         continue
 ```
 
-### Step 4 : Patching
+## Step 4 : Patching
 
 If the method invoke succeeded we can safely patch the method parameters with NOPs and patch the method call itself with the decrypted string.
 
@@ -188,7 +187,7 @@ If the method invoke succeeded we can safely patch the method parameters with NO
                                     decrypted_strings.append(result)
 ```
 
-### Step 5 : Saving
+## Step 5 : Saving
 
 Finally we can save the deobfuscated file to disk.
 
@@ -201,7 +200,7 @@ options.Logger = dnlib.DotNet.DummyLogger.NoThrowInstance
 file_module.Write("out.bin", options)
 ```
 
-# Testing and Final notes
+# Testing and final notes
 
 Let's run the script on the sample we have and see the results.
 
