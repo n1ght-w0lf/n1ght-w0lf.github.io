@@ -20,7 +20,7 @@ But sometimes you don't want to go through every sample and find the decryption 
 
 While looking around for a solution I found this cool [blog](http://rhotav.com/stringDecryptionWithPythonen/), so I will be building on it to write a generic dotnet string decryptor which will hopefully make life a bit easier.
 
-We will be working on an obfuscated sample of [DCRat](https://malpedia.caad.fkie.fraunhofer.de/details/win.dcrat) to test our script
+We will be working on an obfuscated sample of [DCRat](https://malpedia.caad.fkie.fraunhofer.de/details/win.dcrat) to test our script.
 [c6244c8e4e4cdecd641017d52d344b1db6a23d05fd6a8ad338c8f4f77481f483](https://bazaar.abuse.ch/sample/c6244c8e4e4cdecd641017d52d344b1db6a23d05fd6a8ad338c8f4f77481f483/)
 
 # Writing the deobfuscation script
@@ -102,14 +102,14 @@ for module_type in file_assembly.GetTypes():
 If we find a suspected method we need to store its corresponding signature and [MethodInfo](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.methodinfo) object which we will use later to invoke that method.
 
 ```python
-		# Check if the current method has a suspected signature
+        # Check if the current method has a suspected signature
         for sig in StringDecryptor.DECRYPTION_METHOD_SIGNATURES:
             # Check number of parameters and return type
             parameters = method.GetParameters()
             if ((len(parameters) == len(sig["Parameters"])) and
                 (method.ReturnType.FullName == sig["ReturnType"])):
                
-            	# Check parameters types
+                # Check parameters types
                 param_types_match = True
                 for i in range(len(parameters)):
                     if parameters[i].ParameterType.FullName != sig["Parameters"][i]:
@@ -137,11 +137,11 @@ for module_type in file_module.Types:
         if not method.HasBody:
             continue
 
-         # Loop through method instructions
+        # Loop through method instructions
         for insnIdx, insn in enumerate(method.Body.Instructions):
             # Find Call instructions
             if insn.OpCode == OpCodes.Call:
-				for s_method_name, (s_method_sig, s_method_info) in suspected_methods.items():
+                for s_method_name, (s_method_sig, s_method_info) in suspected_methods.items():
                     # Check if the callee is one of the suspected methods
                     if str(s_method_name) in str(insn.Operand):
 ```
@@ -150,7 +150,7 @@ If we find a reference call, we need to get the required parameters (note that t
 
 ```python
                                 # Get method parameters in reverse order
-		                        params = []
+                                params = []
                                 for i in range(len(s_method_sig["Parameters"])):
                                     operand = GetOperandValue(
                                         method.Body.Instructions[insnIdx - i - 1],
@@ -177,7 +177,7 @@ Next we can invoke suspected methods to get the decrypted strings
 If the method invoke succeeded we can safely patch the method parameters with NOPs and patch the method call itself with the decrypted string.
 
 ```python
-									# Patch suspected method parameters with NOPs
+                                    # Patch suspected method parameters with NOPs
                                     for i in range(len(s_method_sig["Parameters"])):
                                         method.Body.Instructions[insnIdx - i - 1].OpCode = OpCodes.Nop
 
