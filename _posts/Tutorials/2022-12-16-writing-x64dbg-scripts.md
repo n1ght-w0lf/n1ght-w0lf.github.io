@@ -92,7 +92,7 @@ The first argument of `savedata` command is the filename, if we use `:memdump:` 
 
 Finally we use `run` command to run the program and watch the magic happen. you can use `Tab` to step into the script or `Space` to run the script.
 
-<video src="https://user-images.githubusercontent.com/58216643/208249322-502985c8-fb2a-4571-af57-a39b0b44eca8.mp4" controls="controls"></video>
+<video src="https://user-images.githubusercontent.com/58216643/208249322-502985c8-fb2a-4571-af57-a39b0b44eca8.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Simple as that.
 
