@@ -94,7 +94,7 @@ analytics:
 author:
   name: "Abdallah Elshinbary"
   avatar: /assets/images/site_data/avatar.jpg # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio: "Malware Analysis & Reverse Engineering Adventures. (OPEN TO WORK)"
+  bio: "(OPEN TO WORK) Malware Analysis & Reverse Engineering Adventures."
   location: "Area 51"
   email:
   links:
@@ -114,7 +114,7 @@ author:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/n1ght-w0lf"
     - label: "Buy Me a Coffee"
-      icon: "fab fa-fw fa-cup-togo"
+      icon: "fa-regular fa-cup-togo"
       url: "https://www.buymeacoffee.com/n1ghtw0lf"
 
 # Site Footer
