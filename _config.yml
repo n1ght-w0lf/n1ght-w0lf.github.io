@@ -114,7 +114,7 @@ author:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/n1ght-w0lf"
     - label: "Buy Me a Coffee"
-      icon: "fa-regular fa-cup-togo"
+      icon: "fab fa-fw fa-mug-shot"
       url: "https://www.buymeacoffee.com/n1ghtw0lf"
 
 # Site Footer
