@@ -101,9 +101,6 @@ author:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: "mailto:abdallahelshinbary82@gmail.com"
-    # - label: "Website"
-    #   icon: "fas fa-fw fa-link"
-    # url: "https://your-website.com"
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/_n1ghtw0lf"
@@ -114,7 +111,7 @@ author:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/n1ght-w0lf"
     - label: "Buy Me a Coffee"
-      icon: "fa-solid fa-mug-hot"
+      icon: "fas fa-fw fa-link"
       url: "https://www.buymeacoffee.com/n1ghtw0lf"
 
 # Site Footer
