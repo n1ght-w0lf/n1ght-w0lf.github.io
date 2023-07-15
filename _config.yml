@@ -98,6 +98,7 @@ author:
   location: "Area 51"
   email:
   links:
+    - label: "(OPEN TO WORK)"
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: "mailto:abdallahelshinbary82@gmail.com"
